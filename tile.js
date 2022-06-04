@@ -1,86 +1,65 @@
 class Tile {
-  constructor(grid, v0, w, l, h, c1, c2, c3, c4, lineW) {
+  constructor(grid, c, a, w, l, h, co1, co2, co3, co4, borderW) {
     this.grid = grid
-    this.v0 = v0
+    this.c = c // v3, of center position info
+    this.a = a // v3, of rotation info
     this.w = w
     this.l = l
     this.h = h
-    this.c1 = c1
-    this.c2 = c2
-    this.c3 = c3
-    this.c4 = c4
-    this.lineW = lineW
+    this.co1 = co1
+    this.co2 = co2
+    this.co3 = co3
+    this.co4 = co4
+    this.borderW = borderW
 
+    this.update()
+  }
+
+  update() {
+    this.updateVertices()
+    this.updateGridVertices()
+  }
+
+  updateVertices() {
     this.vertices = [
-      new v3(v0.x, v0.y, v0.z),
-      new v3(v0.x + w, v0.y, v0.z),
-      new v3(v0.x + w, v0.y + l, v0.z),
-      new v3(v0.x, v0.y + l, v0.z),
-      new v3(v0.x, v0.y, v0.z + h),
-      new v3(v0.x + w, v0.y, v0.z + h),
-      new v3(v0.x + w, v0.y + l, v0.z + h),
-      new v3(v0.x, v0.y + l, v0.z + h),
+      new v3(this.c.x, this.c.y, this.c.z),
+      new v3(this.c.x + this.w, this.c.y, this.c.z),
+      new v3(this.c.x + this.w, this.c.y + this.l, this.c.z),
+      new v3(this.c.x, this.c.y + this.l, this.c.z),
+      new v3(this.c.x, this.c.y, this.c.z + this.h),
+      new v3(this.c.x + this.w, this.c.y, this.c.z + this.h),
+      new v3(this.c.x + this.w, this.c.y + this.l, this.c.z + this.h),
+      new v3(this.c.x, this.c.y + this.l, this.c.z + this.h),
     ]
+  }
 
+  updateGridVertices() {
     this.gridVertices = this.vertices.map((v) =>
       this.grid.toScreen(v)
     )
   }
 
   draw(ctx) {
-    const gs = this.gridVertices
-    ctx.beginPath()
-    ctx.fillStyle = this.c3;
-    moveToV(ctx, gs[5])
-    lineToV(ctx, gs[1])
-    lineToV(ctx, gs[2])
-    lineToV(ctx, gs[6])
-    ctx.fill()
-  
-    ctx.beginPath()
-    ctx.fillStyle = this.c2;
-    moveToV(ctx, gs[6])
-    lineToV(ctx, gs[2])
-    lineToV(ctx, gs[3])
-    lineToV(ctx, gs[7])
-    ctx.fill()
-  
-    ctx.beginPath()
-    ctx.fillStyle = this.c1;
-    moveToV(ctx, gs[4])
-    lineToV(ctx, gs[5])
-    lineToV(ctx, gs[6])
-    lineToV(ctx, gs[7])
-    ctx.fill()
-  
-    ctx.strokeStyle = this.c4;
-    ctx.lineWidth = this.lineW;
-  
-    ctx.beginPath()
-    moveToV(ctx, gs[5])
-    lineToV(ctx, gs[1])
-    lineToV(ctx, gs[2])
-    lineToV(ctx, gs[6])
-    lineToV(ctx, gs[5])
-    ctx.stroke()
-  
-    ctx.beginPath()
-    moveToV(ctx, gs[6])
-    lineToV(ctx, gs[2])
-    lineToV(ctx, gs[3])
-    lineToV(ctx, gs[7])
-    lineToV(ctx, gs[6])
-    ctx.stroke()
-  
-    ctx.beginPath()
-    moveToV(ctx, gs[4])
-    lineToV(ctx, gs[5])
-    lineToV(ctx, gs[6])
-    lineToV(ctx, gs[7])
-    lineToV(ctx, gs[4])
-    ctx.stroke()
+    ctx.strokeStyle = this.co4;
+    ctx.lineWidth = this.borderW;
+    const stroke = this.borderW > 0 ? true : false
+
+    this.drawFace([5,1,2,6], this.co3, stroke)
+    this.drawFace([6,2,3,7], this.co2, stroke)
+    this.drawFace([4,5,6,7], this.co1, stroke)
   }
 
+  drawFace(vArr, fillStyle, stroke) {
+    ctx.beginPath()
+    ctx.fillStyle = fillStyle
+    moveToV(ctx, this.gridVertices[vArr[0]])
+    for (let i = 0; i < vArr.length; i++) {
+      lineToV(ctx, this.gridVertices[vArr[i]])
+    }
+    lineToV(ctx, this.gridVertices[vArr[0]])
+    ctx.fill()
+    if ( stroke ) ctx.stroke()
+  }
 }
 
 
